@@ -3,6 +3,19 @@
 Python implementations of standard System Programming and Compiler Design laboratory experiments.
 This repository is designed for quick execution, clear terminal interaction, and easy academic demonstration in practical exams and viva sessions.
 
+## Download Single File (curl)
+
+Use these commands to download one file at a time from this repository.
+
+```bash
+curl -L -o pass1.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/pass1.py
+curl -L -o pass2.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/pass2.py
+curl -L -o lex.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/lex.py
+curl -L -o decent.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/decent.py
+curl -L -o inter.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/inter.py
+curl -L -o codeopt.py https://raw.githubusercontent.com/sudo-veer/spcc/main/python/codeopt.py
+```
+
 ## Prerequisites
 
 - Python 3.x
