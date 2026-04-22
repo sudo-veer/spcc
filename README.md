@@ -1,93 +1,82 @@
-# SPCC Practicals (MU Sem 6)
+# SPCC Laboratory Experiments (Python)
 
-This repository contains Java implementations for core System Programming and Compiler Construction (SPCC) practicals.
+Python implementations of standard System Programming and Compiler Design laboratory experiments.
+This repository is designed for quick execution, clear terminal interaction, and easy academic demonstration in practical exams and viva sessions.
 
-## Included Programs
+## Prerequisites
 
-1. `Pass1.java` - Macro Processor Pass 1
-2. `LexicalAnalyzer.java` - Lexical Analysis
-3. `RecursiveDescentParser.java` - Recursive Descent Parsing with trace
-4. `IntermediateCodeGeneration.java` - Postfix + Three Address Code + Quadruples
-5. `CodeOptimization.java` - TAC optimization passes
-6. `CodeOptimizationTechniques.java` - Menu-style optimization techniques (CSE, DCE, etc.)
+- Python 3.x
+- No external dependencies (only Python standard library is used)
 
-## Prerequisite
+## Experiments Guide
 
-- Java JDK 17+ (or any modern JDK)
+### 1) Macro Processor (Pass 1 + Pass 2)
 
-## How To Run
+Builds macro tables (MNT/MDT/ALA), generates intermediate code, and expands macro calls into final source.
 
-Use PowerShell from project root:
+#### Run Command
 
-```powershell
-javac <FileName>.java
-java <ClassName>
+```bash
+cd python
+python pass1.py
+python pass2.py
 ```
 
-Example:
-
-```powershell
-javac LexicalAnalyzer.java
-java LexicalAnalyzer
-```
-
----
-
-## 1) Macro Processor Pass 1 (`Pass1.java`)
-
-### Theory (short)
-Pass 1 of macro processor scans macro definitions, builds:
-- MNT (Macro Name Table)
-- MDT (Macro Definition Table)
-- Intermediate source for later expansion
-
-### Start Command
-
-```powershell
-javac Pass1.java
-java Pass1
-```
-
-### Sample Input
-Input program is hardcoded in source.
-
-### Expected Output (sample)
+#### Sample Input
 
 ```text
-Pass 1 completed.
-Created mnt.txt, mdt.txt, intermediate.txt
-
-MNT:
-COMPUTE 0
-
-MDT:
-COMPUTE &X,&Y
-LOAD R1,?1
-ADD R2,?2
-STORE R1,TOTAL
-MEND
+No interactive input required.
+Both scripts use in-code sample source for macro definition and expansion.
 ```
 
----
+#### Expected Output
 
-## 2) Lexical Analyzer (`LexicalAnalyzer.java`)
+```text
+[ MNT ]
+INDEX    MACRO        MDT_PTR
+0        COMPUTE      0
 
-### Theory (short)
-Lexical Analyzer converts source code into token stream such as:
-- KEYWORD
-- IDENTIFIER
-- NUMBER
-- OPERATOR
-- SEPARATOR
+[ MDT ]
+ID       STATEMENT
+0        COMPUTE &X,&Y
+1        LOAD R1,?1
+2        ADD R2,?2
+3        STORE R1,TOTAL
+4        MEND
 
-### Start Command
+[ INTERMEDIATE CODE ]
+START 1000
+READ VAL1
+READ VAL2
+COMPUTE VAL1,VAL2
+PRINT TOTAL
+END
 
-```powershell
-javac LexicalAnalyzer.java
-java LexicalAnalyzer
+========== PASS 2: EXPANSION COMPLETE ==========
+[FINAL EXPANDED SOURCE CODE]
+START 1000
+READ VAL1
+READ VAL2
+.* Expansion of COMPUTE
++ LOAD R1,VAL1
++ ADD R2,VAL2
++ STORE R1,TOTAL
+PRINT TOTAL
+END
 ```
 
-### Sample Input
+### 2) Lexical Analyzer
+
+Tokenizes input source code into KEYWORD, IDENTIFIER, NUMBER, OPERATOR, and SEPARATOR.
+
+#### Run Command
+
+```bash
+cd python
+python lex.py
+```
+
+#### Sample Input
 
 ```text
 int a = 10;
@@ -97,206 +86,162 @@ if (a > 5) {
 END
 ```
 
-### Expected Output (sample)
+#### Expected Output
 
 ```text
-KEYWORD int
-IDENTIFIER a
-OPERATOR =
-NUMBER 10
-SEPARATOR ;
-...
+-----------------------------------
+LEXEME          | TOKEN TYPE
+-----------------------------------
+int             | KEYWORD
+a               | IDENTIFIER
+=               | OPERATOR
+10              | NUMBER
+;               | SEPARATOR
+if              | KEYWORD
+(               | SEPARATOR
+a               | IDENTIFIER
+>               | OPERATOR
+5               | NUMBER
+)               | SEPARATOR
+{               | SEPARATOR
+a               | IDENTIFIER
+=               | OPERATOR
+a               | IDENTIFIER
++               | OPERATOR
+1               | NUMBER
+;               | SEPARATOR
+}               | SEPARATOR
+-----------------------------------
 ```
 
----
+### 3) Recursive Descent Parser
 
-## 3) Recursive Descent Parser (`RecursiveDescentParser.java`)
+Implements top-down parsing for expression grammar:
+E -> T E', E' -> + T E' | e, T -> F T', T' -> * F T' | e, F -> (E) | id
 
-### Theory (short)
-Recursive descent parser is top-down parsing where each non-terminal is implemented as a function.
-Current grammar style used:
-- E -> T E'
-- E' -> (+|-) T E' | e
-- T -> F T'
-- T' -> (*|/) F T' | e
-- F -> (E) | id | num
+#### Run Command
 
-It also prints trace columns: `Stack`, `Input`, `Action`.
-
-### Start Command
-
-```powershell
-javac RecursiveDescentParser.java
-java RecursiveDescentParser
+```bash
+cd python
+python decent.py
 ```
 
-### Sample Input
+#### Sample Input
 
 ```text
-a+b*(c-2)
+a+b*c
 ```
 
-### Expected Output (sample)
+#### Expected Output
 
 ```text
-Stack                Input                Action
-$E                   a+b*(c-2)$           Start
-$E                   a+b*(c-2)$           E -> T E'
-...
-$E                   $                    Accepted
+-----------------------------------
+INPUT           | ACTION
+-----------------------------------
+a+b*c$          | E -> T E'
+a+b*c$          | T -> F T'
+a+b*c$          | Match 'a'
++b*c$           | T' -> e
++b*c$           | Match '+'
+b*c$            | T -> F T'
+b*c$            | Match 'b'
+*c$             | Match '*'
+c$              | Match 'c'
+$               | T' -> e
+$               | E' -> e
+-----------------------------------
+SUCCESS: Input accepted.
 ```
 
----
+### 4) Intermediate Code Generation
 
-## 4) Intermediate Code Generation (`IntermediateCodeGeneration.java`)
+Converts assignment expressions into postfix notation, three-address code (TAC), quadruples, and triples.
 
-### Theory (short)
-ICG converts expressions to machine-independent intermediate form.
-This program generates:
-- Postfix expression
-- Three Address Code (TAC)
-- Quadruple representation
+#### Run Command
 
-### Start Command
-
-```powershell
-javac IntermediateCodeGeneration.java
-java IntermediateCodeGeneration
+```bash
+cd python
+python inter.py
 ```
 
-### Sample Input
+#### Sample Input
 
 ```text
-a=b*c+d
+a = b * c + d
 ```
 
-### Expected Output
+#### Expected Output
 
 ```text
-Postfix Expression:
+[ POSTFIX ]
 b c * d +
 
-Three Address Code:
+[ THREE ADDRESS CODE ]
 t1 = b * c
 t2 = t1 + d
 a = t2
 
-Quadruple Table:
-No.    Op       Arg1     Arg2     Result
-1      *        b        c        t1
-2      +        t1       d        t2
-3      =        t2       -        a
+[ QUADRUPLES ]
+INDEX    OP     ARG1       ARG2       RESULT
+0        *      b          c          t1
+1        +      t1         d          t2
+2        =      t2         -          a
+
+[ TRIPLES ]
+INDEX    OP     ARG1       ARG2
+0        *      b          c
+1        +      (0)        d
+2        =      a          (1)
 ```
 
----
+### 5) Code Optimization Techniques
 
-## 5) Code Optimization Passes (`CodeOptimization.java`)
+Demonstrates common optimization techniques: common subexpression elimination, dead code elimination, loop optimization concept, and strength reduction.
 
-### Theory (short)
-This program applies standard optimization passes on TAC-like input:
-- Constant folding
-- Constant propagation
-- Copy propagation
-- Algebraic simplification
-- Dead code elimination
+#### Run Command
 
-### Start Command
-
-```powershell
-javac CodeOptimization.java
-java CodeOptimization
+```bash
+cd python
+python codeopt.py
 ```
 
-### Sample Input
+#### Sample Input
 
 ```text
-7
-t1 = 2 + 3
-t2 = t1 * 1
-t3 = t2 + 0
-t4 = t3 * 0
-a = t3
-b = a
-t5 = b + 4
-```
-
-### Expected Output (sample)
-
-```text
-Optimized TAC:
-t1 = 5
-t2 = t1
-t3 = t2
-a = t3
-b = t3
-```
-
----
-
-## 6) Code Optimization Techniques (`CodeOptimizationTechniques.java`)
-
-### Theory (short)
-This file is practical-oriented and mirrors typical MU lab flow:
-1. Common Subexpression Elimination
-2. Dead Code Elimination
-3. Loop Invariant Code Motion (demo)
-4. Strength Reduction
-
-### Start Command
-
-```powershell
-javac CodeOptimizationTechniques.java
-java CodeOptimizationTechniques
-```
-
-### Sample Input
-
-```text
-4
+2
 t1 = a + b
 t2 = a + b
-t3 = c + d
-t4 = a + b
-4
-a = b + c
-dead t1 = a + b
-x = y + z
-dead temp = a + 5
-6
+3
+x = 10
+dead temp = 0
+y = x
+5
 ```
 
-### Expected Output (sample)
+#### Expected Output
 
 ```text
 ===== CODE OPTIMIZATION TECHNIQUES =====
 
---- Common Subexpression Elimination ---
-...
+--- CSE ---
 Optimized Code:
 t1 = a + b
 t2 = t1
-t3 = c + d
-t4 = t2
 
 --- Dead Code Elimination ---
-...
 Optimized Code:
-a = b + c
-x = y + z
+x = 10
+y = x
 
---- Loop Optimization (Loop Invariant Code Motion) ---
+--- Loop Optimization (LICM) ---
 Sum after loop optimization = 75
 
 --- Strength Reduction ---
-After Strength Reduction (x * 2 -> x << 1): 12
-
-===== OPTIMIZATION COMPLETE =====
+After Strength Reduction (x * 2 -> x << 1): 10
 ```
 
----
+## License
 
-## Notes
+This project is licensed under the MIT License.
 
-- Keep expression/operator spacing as shown in sample wherever format-sensitive.
-- For interactive programs, finish input exactly as prompt asks (for example, `END` in lexical analyzer).
-- If a run fails, compile that specific file again before running.
+
